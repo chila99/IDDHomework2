@@ -1,56 +1,38 @@
 package lucenex;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.codecs.Codec;
+import org.apache.lucene.codecs.simpletext.SimpleTextCodec;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.FieldInfos;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
-import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Explanation;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.PhraseQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.similarities.BM25Similarity;
-import org.apache.lucene.search.similarities.ClassicSimilarity;
-import org.apache.lucene.search.similarities.LMJelinekMercerSimilarity;
-import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.codecs.simpletext.SimpleTextCodec;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 public class indexing {
 
      public static String indexPath = "/Users/davidemolitierno/Desktop/UNI/Ingegneria dei Dati/Homeworks/Homework2/index";
      public static String documentPath = "/Users/davidemolitierno/Desktop/UNI/Ingegneria dei Dati/Homeworks/Homework2/songs";
 
-     public static void main(String args[]) {
+     public static void main(String[] args) {
          Path path = Paths.get(indexPath);
-         System.out.println(path);
          try(Directory directory = FSDirectory.open(path)){
             index(directory, new SimpleTextCodec());
          } catch (IOException e) {
@@ -58,20 +40,11 @@ public class indexing {
      }
 
     private static void index(Directory directory, Codec codec) throws IOException {
-         CharArraySet englishStopWords = new CharArraySet(Arrays.asList("a", "an", "and", "are", "as", "at", "be", "but",
-                 "by", "or", "if", "in", "into", "is", "it", "no", "not", "of", "on", "or", "such", "that", "the", "their",
-                 "then", "there", "these","they", "this", "to", "was", "will", "with"), true);
-         CharArraySet italianStopWords = new CharArraySet(Arrays.asList("in", "dei", "di", "a", "da", "in", "con", "su",
-                 "per", "tra", "fra", "il", "i", "gli", "le", "e", "o"), true);
-         CharArraySet spanishStopWords = new CharArraySet(Arrays.asList("y", "o"), true);
-         CharArraySet stopWords = new CharArraySet(englishStopWords, true);
-         stopWords.add(italianStopWords);
-         stopWords.add(spanishStopWords);
 
          Analyzer defaultAnalyzer = new StandardAnalyzer();
          Map<String, Analyzer> perFieldAnalyzers = new HashMap<>();
          perFieldAnalyzers.put("titolo", new WhitespaceAnalyzer());
-         perFieldAnalyzers.put("contenuto", new StandardAnalyzer(stopWords));
+         perFieldAnalyzers.put("contenuto", new EnglishAnalyzer());
 
          Analyzer analyzer = new PerFieldAnalyzerWrapper(defaultAnalyzer, perFieldAnalyzers);
 
@@ -90,7 +63,8 @@ public class indexing {
                  Document doc = new Document();
                  doc.add(new TextField("titolo", child.getName(), Field.Store.YES));
                  String text = getContent(child);
-                 doc.add(new TextField("Contenuto", text, Field.Store.NO));
+                 text = text.replace("\n", "").replace("\r", "");
+                 doc.add(new TextField("contenuto", text, Field.Store.NO));
 
                  writer.addDocument(doc);
              }
@@ -98,16 +72,17 @@ public class indexing {
              writer.close();
          } else {
              writer.close();
-             return ;
          }
     }
 
     private static String getContent(File file) throws FileNotFoundException {
         Scanner sc = new Scanner(file);
-        String text = null;
-        while(sc.hasNextLine()){
-            text = sc.nextLine();
+        StringBuilder sb = new StringBuilder();
+        while(sc.hasNext()) {
+            sb.append(sc.next());
+            sb.append(' ');
         }
-        return text;
+        sc.close();
+        return sb.toString();
     }
 }
