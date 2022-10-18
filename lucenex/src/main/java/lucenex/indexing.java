@@ -61,7 +61,7 @@ public class indexing {
          if (directoryListing != null) {
              for (File child : directoryListing) {
                  Document doc = new Document();
-                 doc.add(new TextField("titolo", child.getName(), Field.Store.YES));
+                 doc.add(new TextField("titolo", child.getName().split("\\.")[0], Field.Store.YES));
                  String text = getContent(child);
                  text = text.replace("\n", "").replace("\r", "");
                  doc.add(new TextField("contenuto", text, Field.Store.NO));
