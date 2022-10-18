@@ -24,13 +24,14 @@ import java.util.Scanner;
 
 public class Searching {
 
-    public static String indexPath = "/Users/davidemolitierno/Desktop/UNI/Ingegneria dei Dati/Homeworks/Homework2/index";
+    public static String indexPath = "../index";
 
+    /**
+     * Metodo che permette di effettuare query
+     * @throws IOException
+     * @throws ParseException
+     */
     public static void main(String[] args) throws IOException, ParseException {
-        search();
-    }
-
-    private static void search() throws IOException, ParseException {
         boolean stop = false;
         while(!stop){
             System.out.println("Inserisci una query o scrivi 0 per terminare.");
@@ -41,16 +42,25 @@ public class Searching {
             System.out.println(risposta);
             if(risposta.equals("0"))
                 stop = true;
-            else elaborateQuery(risposta);
+            else{
+                Query query = elaborateQuery(risposta);
+                runQuery(query);
+            }
         }
 
     }
 
-    private static void elaborateQuery(String inputString) throws IOException, ParseException {
-        Path path = Paths.get(indexPath);
-        Query query;
-        QueryParser queryParser;
+    /**
+     * Metodo che elabora la stringa in input
+     * @param inputString
+     * @return
+     * @throws IOException
+     * @throws ParseException
+     */
+    private static Query elaborateQuery(String inputString) throws IOException, ParseException {
         String[] splittedInputString = inputString.split(":");
+        QueryParser queryParser;
+        Query query;
         if(splittedInputString[0].equals("titolo") || splittedInputString[0].equals("contenuto")){
             Analyzer analyzer = new StandardAnalyzer();
             //per fare in modo che le query per il titolo vengano capitalized
@@ -67,26 +77,33 @@ public class Searching {
             queryParser.setDefaultOperator(QueryParser.Operator.OR);
             query = queryParser.parse(inputString);
         }
+        return query;
+    }
+
+    /**
+     * Metodo che esegui il run della query parametro
+     * @param query
+     * @throws IOException
+     */
+    private static void runQuery(Query query) throws IOException {
+        Path path = Paths.get(indexPath);
+        IndexSearcher searcher;
         try (Directory directory = FSDirectory.open(path)) {
             try (IndexReader reader = DirectoryReader.open(directory)) {
-                IndexSearcher searcher = new IndexSearcher(reader);
-                runQuery(searcher, query);
+                searcher = new IndexSearcher(reader);
+                TopDocs docs = searcher.search(query, 10);
+                System.out.println("Processando:" + query.toString() +"\n");
+                for(int i = 0; i < docs.scoreDocs.length; i++){
+                    ScoreDoc scoreDoc = docs.scoreDocs[i];
+                    Document doc = searcher.doc(scoreDoc.doc);
+                    System.out.println("doc"+scoreDoc.doc + ":"+ doc.get("titolo") + " (" + scoreDoc.score +")");
+        }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } finally {
                 directory.close();
             }
-    }
-}
-
-    private static void runQuery(IndexSearcher searcher, Query query) throws IOException {
-        TopDocs docs = searcher.search(query, 10);
-        System.out.println("Processando:" + query.toString() +"\n");
-        for(int i = 0; i < docs.scoreDocs.length; i++){
-            ScoreDoc scoreDoc = docs.scoreDocs[i];
-            Document doc = searcher.doc(scoreDoc.doc);
-            System.out.println("doc"+scoreDoc.doc + ":"+ doc.get("titolo") + " (" + scoreDoc.score +")");
         }
         System.out.println("\n");
     }
-    }
+}

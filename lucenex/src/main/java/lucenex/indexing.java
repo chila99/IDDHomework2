@@ -1,7 +1,6 @@
 package lucenex;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
@@ -21,30 +20,39 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class indexing {
 
-     public static String indexPath = "/Users/davidemolitierno/Desktop/UNI/Ingegneria dei Dati/Homeworks/Homework2/index";
-     public static String documentPath = "/Users/davidemolitierno/Desktop/UNI/Ingegneria dei Dati/Homeworks/Homework2/songs";
+     //path dell'indice
+     public static String indexPath = "../index";
+     //path della directory da indicizzare
+     public static String documentPath = "../songs";
 
      public static void main(String[] args) {
          Path path = Paths.get(indexPath);
          try(Directory directory = FSDirectory.open(path)){
-            index(directory, new SimpleTextCodec());
+            index(directory, null);
          } catch (IOException e) {
+             System.out.println("Errore nell'apertura dell'index");
          }
      }
 
+    /**
+     * Metodo che indicizza i file all'interno di una directory
+     * e se eventualmente inizializzato salva l'indice con un codec
+     * @param directory
+     * @param codec
+     * @throws IOException
+     */
     private static void index(Directory directory, Codec codec) throws IOException {
 
          Analyzer defaultAnalyzer = new StandardAnalyzer();
          Map<String, Analyzer> perFieldAnalyzers = new HashMap<>();
          perFieldAnalyzers.put("titolo", new WhitespaceAnalyzer());
-         perFieldAnalyzers.put("contenuto", new EnglishAnalyzer());
+         perFieldAnalyzers.put("contenuto", new StandardAnalyzer());
 
          Analyzer analyzer = new PerFieldAnalyzerWrapper(defaultAnalyzer, perFieldAnalyzers);
 
@@ -57,7 +65,9 @@ public class indexing {
          writer.deleteAll();
          File dir = new File(documentPath);
          File[] directoryListing = dir.listFiles();
+         System.out.println("Indexing " + directoryListing.length + " txt files");
 
+         long startTime = System.nanoTime();
          if (directoryListing != null) {
              for (File child : directoryListing) {
                  Document doc = new Document();
@@ -70,11 +80,21 @@ public class indexing {
              }
              writer.commit();
              writer.close();
+             long endTime = System.nanoTime();
+             long duration = (endTime - startTime)/1000000;
+             System.out.println("Tempo per indicizzare: " + duration + " ms");
          } else {
              writer.close();
          }
     }
 
+    /**
+     * Metodo che ritorna il contenuto di un file
+     * sostituendo i caratteri '\n' con uno ' '
+     * @param file
+     * @return il contenuto del file
+     * @throws FileNotFoundException
+     */
     private static String getContent(File file) throws FileNotFoundException {
         Scanner sc = new Scanner(file);
         StringBuilder sb = new StringBuilder();
