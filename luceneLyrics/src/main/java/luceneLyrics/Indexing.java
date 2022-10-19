@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-public class indexing {
+public class Indexing {
 
      //path dell'indice
      public static String indexPath = "../index";
