@@ -1,4 +1,4 @@
-package lucenex;
+package luceneLyrics;
 
 import java.io.IOException;
 import java.io.PrintWriter;

@@ -1,3 +1,3 @@
-# lucenex
+# luceneLyrics
 
 A few Lucene examples 
