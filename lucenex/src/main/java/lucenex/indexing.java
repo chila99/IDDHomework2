@@ -1,6 +1,7 @@
 package lucenex;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
@@ -20,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -48,11 +50,13 @@ public class indexing {
      * @throws IOException
      */
     private static void index(Directory directory, Codec codec) throws IOException {
-
+         CharArraySet stopWords = new CharArraySet(Arrays.asList("di", "a", "da", "in", "con", "su", "per", "tra", "fra",
+                 "il", "lo", "la", "i", "gli", "le", "an", "some", "the", "el", "los", "los", "unos", "unas", "de", "desde",
+                 "en", "con", "para", "por", "hasta", "entre", "hacia", "tras", "sin", "contra", "según", "sobre", "ante", "bajo"), true);
          Analyzer defaultAnalyzer = new StandardAnalyzer();
          Map<String, Analyzer> perFieldAnalyzers = new HashMap<>();
          perFieldAnalyzers.put("titolo", new WhitespaceAnalyzer());
-         perFieldAnalyzers.put("contenuto", new StandardAnalyzer());
+         perFieldAnalyzers.put("contenuto", new StandardAnalyzer(stopWords));
 
          Analyzer analyzer = new PerFieldAnalyzerWrapper(defaultAnalyzer, perFieldAnalyzers);
 
