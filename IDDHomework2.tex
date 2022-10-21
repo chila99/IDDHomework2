@@ -1,0 +1,80 @@
+\documentclass[12pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+
+\lstset{style=mystyle}
+
+\title{Homework 2}
+\author{Davide Molitierno}
+\date{21 ottobre 2022}
+
+\begin{document}
+
+\maketitle
+Link github del progetto: \url{https://github.com/chila99/IDDHomework2}
+\section{Introduction}
+Tale progetto ha lo scopo di indicizzare dei documenti in formato .txt relativi ai testi di canzoni di differenti artisti pre-selezionati e di fornire la possibilità per mezzo di apposite query di effettuare ricerche verso l'indice creato.
+
+\section{Costruzione del dataset}
+A seguito di numerose difficoltà nel trovare un dataset corposo di file testuali, la cartella dei documenti è stata generata attraverso l'utilizzo del seguente script Python.
+\begin{lstlisting}[language=Python]
+import lyricsgenius
+
+genius = lyricsgenius.Genius(personal_token, verbose=True, remove_section_headers=True, skip_non_songs=True, retries=5, timeout=120)
+artists = ["Imagine Dragons", "Ed Sheeran" "Justin Bieber", "AC/DC", "Bad Bunny", "Beyonce", "Tiziano Ferro"]
+for artist in artists:
+    retrievedArtist = genius.search_artist(artist, max_songs=100, get_full_info=False)
+    for song in retrievedArtist.songs:
+        with open('../songs/'+ slugify(song.title) + '.txt', 'w') as f:
+            f.write(retrievedArtist.name +"\n")
+            f.write(song.lyrics)
+\end{lstlisting}
+Tale script si avvale della libreria Genius di lyricsGenius e permette di ottenere e salvare su di un file in locale i migliori 100 lyrics di una serie di artisti passati come parametri.
+\section{Classi Del Progetto}
+Il progetto è composto da due classi differenti chiamate \textbf{\emph{Indexing}} e \textbf{\emph{Searching}} che permettono rispettivamente di indicizzare gli elementi nella directory specificata e di effettuare ricerche nell'indice creato.
+\subsection{Indexing}
+Tale classe ha lo scopo, a partire dal path della directory in cui sono salvati i vari file, di indicizzare i documenti sulla base di due tipi di Analyzer diversi:
+\begin{itemize}
+    \item CustomAnalyzer con tokenizer di tipo whitespace e un filtro di tipo capitalization per il campo titolo.
+    \item StandardAnalyzer con una serie di stopwords della lingua inglese, italiana e spagnola per il campo contenuto.
+\end{itemize} Il tempo impiegato dal sistema per indicizzare l’intera directory contenente circa 500 file testuali di testi di canzoni è mediamente pari a 300ms. 
+\subsection{Searching}
+La classe di searching permette in loop(fino a che non si inserisce il valore 0) di effettuare query di diverso tipo ottenendo vari risultati. Nello specifico verranno ritornati sempre i primi 10 risultati nel ranking. Le possibili query sono le seguenti: “campo: query” e “query”. La prima cercherà esclusivamente nel campo indicato mentre la seconda effettuerà una ricerca in entrambi i campi. Infine è anche possibili fornire al sistema una phrasequery inserendo tra apici(“”) la frase da voler cercare. Nota: quando si cerca per il titolo è stato usato un analyzer speciale che rende maiuscole tutte le iniziali delle parole della query.
+Esempi di query con risultati:
+
+\end{document}
