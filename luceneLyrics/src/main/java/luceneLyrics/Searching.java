@@ -49,32 +49,30 @@ public class Searching {
     /**
      * Metodo che elabora la stringa in input
      * @param inputString
-     * @return
+     * @return query
      * @throws IOException
      * @throws ParseException
      */
     private static Query elaborateQuery(String inputString) throws IOException, ParseException {
         String[] splittedInputString = inputString.split(":");
-        QueryParser queryParser;
-        Query query;
         //se si sta effettuando una ricerca per uno dei due campi
-        if(splittedInputString[0].equals("titolo") || splittedInputString[0].equals("contenuto")){
-            Analyzer analyzer = new StandardAnalyzer();
-            //se la prima stringa in input è il titolo usa un filtro che rende maiuscole iniziali delle parole
-            if(splittedInputString[0].equals("titolo")){
-                analyzer = CustomAnalyzer.builder()
-                    .withTokenizer("standard")
+        //se la prima stringa in input è il titolo usa un filtro che rende maiuscole iniziali delle parole
+        Analyzer analyzer = new StandardAnalyzer();
+        if(splittedInputString[0].equals("titolo")){
+            analyzer = CustomAnalyzer.builder()
+                    .withTokenizer("whitespace")
                     .addTokenFilter("capitalization")
                     .build();
-            }
-            //per il contenuto usa lo standardAnalyzer
-            queryParser = new QueryParser(splittedInputString[0], analyzer);
+        }
+
+        //altrimenti effettua la ricerca su entrambi i campi
+        MultiFieldQueryParser queryParser = new MultiFieldQueryParser(new String[] {"titolo", "contenuto"}, analyzer);
+        queryParser.setDefaultOperator(QueryParser.Operator.OR);
+        Query query;
+        try{
             query = queryParser.parse(inputString);
-        }else{
-            //altrimenti effettua la ricerca su entrambi i campi
-            queryParser = new MultiFieldQueryParser(new String[] {"titolo", "contenuto"}, new StandardAnalyzer());
-            queryParser.setDefaultOperator(QueryParser.Operator.OR);
-            query = queryParser.parse(inputString);
+        }catch (ParseException p){
+            query = new MatchNoDocsQuery();
         }
         return query;
     }
