@@ -47,10 +47,10 @@
 
 \maketitle
 Link github del progetto: \url{https://github.com/chila99/IDDHomework2}
-\section{Introduction}
-Tale progetto ha lo scopo di indicizzare dei documenti in formato .txt relativi ai testi di canzoni di differenti artisti pre-selezionati e di fornire la possibilità per mezzo di apposite query di effettuare ricerche verso l'indice creato.
+\section{Introduzione}
+Il progetto in questione ha lo scopo di indicizzare dei documenti in formato .txt relativi ai testi di canzoni di differenti artisti pre-selezionati e di fornire la possibilità per mezzo di apposite query di effettuare ricerche verso l'indice creato.
 
-\section{Costruzione del dataset}
+\section{Dataset}
 A seguito di numerose difficoltà nel trovare un dataset corposo di file testuali, la cartella dei documenti è stata generata attraverso l'utilizzo del seguente script Python.
 \begin{lstlisting}[language=Python]
 import lyricsgenius
@@ -64,15 +64,20 @@ for artist in artists:
             f.write(retrievedArtist.name +"\n")
             f.write(song.lyrics)
 \end{lstlisting}
-Tale script si avvale della libreria Genius di lyricsGenius e permette di ottenere e salvare su di un file in locale i migliori 100 lyrics di una serie di artisti passati come parametri.
-\section{Classi Del Progetto}
+Tale script si avvale della libreria Genius di lyricsGenius e permette di ottenere e salvare su di un file in locale i migliori 100 lyrics di una lista di artisti passata come parametro.
+\section{Classi}
 Il progetto è composto da due classi differenti chiamate \textbf{\emph{Indexing}} e \textbf{\emph{Searching}} che permettono rispettivamente di indicizzare gli elementi nella directory specificata e di effettuare ricerche nell'indice creato.
 \subsection{Indexing}
-Tale classe ha lo scopo, a partire dal path della directory in cui sono salvati i vari file, di indicizzare i documenti sulla base di due tipi di Analyzer diversi:
+Tale classe ha lo scopo, a partire dal path della directory in cui sono salvati i vari file, di indicizzare i documenti sulla base di due differenti campi: 
+\begin{itemize}
+    \item titolo: contenente il titolo della canzone.
+    \item contenuto: contenente il testo della canzone.
+\end{itemize}
+L'intera directory contiene 573 file testuali ed il sistema impiega circa 300ms per effettuare l'intera operazione di indicizzazione. Infine tale classe si avvale di due tipi differenti di analyzer:
 \begin{itemize}
     \item CustomAnalyzer con tokenizer di tipo whitespace e un filtro di tipo capitalization per il campo titolo.
     \item StandardAnalyzer con una serie di stopwords della lingua inglese, italiana e spagnola per il campo contenuto.
-\end{itemize} Il tempo impiegato dal sistema per indicizzare l’intera directory contenente circa 500 file testuali di testi di canzoni è mediamente pari a 300ms. 
+\end{itemize}
 \subsection{Searching}
 La classe di searching permette in loop(fino a che non si inserisce il valore 0) di effettuare query di diverso tipo ottenendo vari risultati. Nello specifico verranno ritornati sempre i primi 10 risultati nel ranking. Le possibili query sono le seguenti: “campo: query” e “query”. La prima cercherà esclusivamente nel campo indicato mentre la seconda effettuerà una ricerca in entrambi i campi. Infine è anche possibili fornire al sistema una phrasequery inserendo tra apici(“”) la frase da voler cercare. Nota: quando si cerca per il titolo è stato usato un analyzer speciale che rende maiuscole tutte le iniziali delle parole della query.
 Esempi di query con risultati:
