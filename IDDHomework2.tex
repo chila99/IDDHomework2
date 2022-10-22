@@ -37,9 +37,13 @@
     pdfpagemode=FullScreen,
     }
 
+\setlength{\arrayrulewidth}{0.5mm}
+\setlength{\tabcolsep}{15pt}
+\renewcommand{\arraystretch}{1.37}
+
 \lstset{style=mystyle}
 
-\title{Homework 2}
+\title{Ingegneria Dei Dati - Homework 2}
 \author{Davide Molitierno - 537969}
 \date{21 ottobre 2022}
 
@@ -63,27 +67,28 @@ for artist in artists:
             f.write(retrievedArtist.name +"\n")
             f.write(song.lyrics)
 \end{lstlisting}
-Tale script si avvale della libreria Genius di lyricsGenius e permette di ottenere e salvare su di un file in locale 100 lyrics di una lista di artisti passata come parametro(la funzione slugify effettua il parsing della stringa passata in input, in questo caso il titolo della singola canzone, andando ad eliminare caratteri che successivamente avrebbero potuto creare problemi).
+Tale script si avvale della libreria Genius di lyricsGenius e permette di ottenere e salvare su una directory in locale 100 lyrics di una lista di artisti passata come parametro(la funzione slugify effettua il parsing della stringa passata in input, in questo caso il titolo della singola canzone, andando ad eliminare caratteri che successivamente avrebbero potuto creare problemi).
 \section{Indexing}
-Tale classe ha lo scopo, a partire dal path della directory in cui sono salvati i vari file, di indicizzare i documenti sulla base di due differenti campi: 
+Tale classe ha lo scopo, a partire dal path della directory in cui sono salvati i diversi file, di indicizzare i documenti sulla base di due differenti campi: 
 \begin{itemize}
     \item titolo: contenente il titolo della canzone.
     \item contenuto: contenente il testo della canzone.
 \end{itemize}
-L'intera directory contiene 573 file testuali di dimensioni non eccessivamente elevate ed il sistema impiega circa 300ms per effettuare l'intera operazione di indicizzazione. La classe di indexing si avvale di due tipi differenti di analyzer:
+L'intera directory contiene 573 file testuali di dimensioni non eccessivamente elevate ed il sistema impiega circa 300ms per effettuare l'intera operazione di indicizzazione. Infine la classe di indexing si avvale di due tipi differenti di analyzer:
 \begin{itemize}
-    \item CustomAnalyzer con tokenizer di tipo whitespace e un filtro di tipo capitalization per il campo titolo in modo tale che tutti i token di tale campo vengano preservati e la loro prima lettera resa maiuscola;
-    \item StandardAnalyzer con una serie di stopwords della lingua inglese, italiana e spagnola per il campo contenuto così da rendere meno dipendente la ricerca dei documenti da tali token di uso comune.
+    \item un CustomAnalyzer con tokenizer di tipo whitespace e un filtro di tipo capitalization per il campo titolo in modo tale che tutti i token di tale campo vengano preservati e la loro prima lettera resa maiuscola;
+    \item uno StandardAnalyzer con una serie di stopwords della lingua inglese, italiana e spagnola per il campo contenuto così da rendere meno dipendente la ricerca dei documenti da tali token di uso comune.
 \end{itemize}
 \section{Searching}
-Tale classe permette in loop(fino a che non si inserisce il valore 0) di effettuare query di diverso tipo ottenendo differenti risultati. Nello specifico verranno ritornati sempre i primi 10 risultati nel ranking per il quale viene fatto matching. Le query permesse seguono la seguente sintassi: "query" e "campo: query". La prima permette di effettuare la ricerca su tutti i campi mentre la seconda esclusivamente nel campo che viene specificato. Qualora non si inserisca alcuna stringa il sistema non restituisce alcun documento. Infine è anche possibile fornire al programma una phrasequery inserendo tra apici(“”) la frase da voler cercare. Nota: quando vengono effettuate ricerche per il campo titolo è stato usato un analyzer speciale che rende maiuscole tutte le iniziali presenti nella query.
+Tale classe permette in loop(fino a che non si inserisce il valore 0) di effettuare query di diverso tipo ottenendo differenti risultati. Nello specifico verranno ritornati sempre i primi 10 risultati nel ranking per il quale viene fatto matching. Le query permesse seguono la seguente sintassi: “query” e “campo: query”. La prima permette di effettuare la ricerca su tutti i campi mentre la seconda esclusivamente sul campo che viene specificato. Qualora non si inserisca alcuna stringa il sistema non restituisce alcun documento. Infine è anche possibile fornire al programma una phrasequery inserendo tra apici(“”) la frase da voler cercare. Nota: quando vengono effettuate ricerche per il campo titolo è stato usato un analyzer speciale che rende maiuscole tutte le iniziali presenti nella query.
 
 \begin{center}
     La tabella \ref{table:data} mostra esempi di query con risultati:
-\end{center}
 \begin{table}[h!]
-\centering
-\begin{tabular}{||c c c |} 
+\begin{tabular}{ |p{3cm}|p{5cm}|p{5cm}|  }
+\hline
+\multicolumn{3}{|c|}{\textbf{Queries}} \\
+\hline
  \hline
 \textbf{Query} & \textbf{Descrizione} & \textbf{Primi 3 Risultati}\\[1ex]
  \hline\hline
@@ -96,11 +101,12 @@ Tale classe permette in loop(fino a che non si inserisce il valore 0) di effettu
  titolo: blood contenuto: hate & query specifica su entrambi i campi & If You Want Blood  Youve Got It  \\
  titolo: "love on top" & phrase query sul titolo & Love on Top\\
  contenuto: "ridi ridi ridi" & phrase query sul contenuto & Ma So Proteggerti\\
- " " & stringa vuota & nessun documento \\
+ “” & stringa vuota & nessun documento \\
  \hline
 \end{tabular}
 \caption{Esempi di query.}
 \label{table:data}
 \end{table}
+\end{center}
 
 \end{document}
